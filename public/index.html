@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Google Fonts Localizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 2em;
+        }
+        input {
+            width: 80%;
+            padding: 0.5em;
+            font-size: 1em;
+        }
+        button {
+            padding: 0.5em 1em;
+            font-size: 1em;
+        }
+        #message {
+            margin-top: 1em;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Google Fonts Localizer</h1>
+    <p>Enter the URL of a Google Fonts CSS file:</p>
+    <input type="text" id="cssUrl" placeholder="https://fonts.googleapis.com/css?family=Roboto">
+    <button id="generateBtn">Generate Localized Fonts</button>
+    <div id="message"></div>
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const cssUrl = document.getElementById('cssUrl').value.trim();
+            if (!cssUrl) {
+                document.getElementById('message').textContent = 'Please enter a URL.';
+                return;
+            }
+            document.getElementById('message').textContent = 'Processing...';
+            try {
+                const response = await fetch('/localize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cssUrl })
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'fonts.zip';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                document.getElementById('message').textContent = 'Download started!';
+            } catch (error) {
+                console.error(error);
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

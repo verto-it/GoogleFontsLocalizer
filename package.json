@@ -1,0 +1,19 @@
+{
+  "name": "google-fonts-localizer",
+  "version": "1.0.0",
+  "description": "Localize a Google Fonts CSS file by downloading font files and creating a single CSS file with local paths.",
+  "main": "server.js",
+  "scripts": {
+    "prod": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "archiver": "^5.3.1",
+    "compression": "^1.7.4",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.6.0",
+    "helmet": "^6.0.1",
+    "morgan": "^1.10.0"
+  }
+}
