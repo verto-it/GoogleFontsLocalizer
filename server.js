@@ -17,14 +17,6 @@ app.use(compression());
 // HTTP request logging
 app.use(morgan('combined'));
 
-// Rate limiting: maximum 100 requests per 15 minutes per IP
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again after 15 minutes'
-});
-app.use(limiter);
-
 // Parse incoming JSON requests
 app.use(express.json());
 
