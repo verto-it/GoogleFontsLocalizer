@@ -15,10 +15,16 @@ app.use(helmet());
 app.use(compression());
 
 // HTTP request logging
-app.use(morgan('combined'));
+app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {
+    skip: (req, res) => req.ip === '127.0.0.1' || req.ip === '::1',
+    stream: process.stdout
+}));
 
 // Parse incoming JSON requests
 app.use(express.json());
+
+// Trust first proxy
+app.set('trust proxy', 1);
 
 // Serve static files from the public folder
 app.use(express.static('public'));
