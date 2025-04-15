@@ -5,7 +5,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const morgan = require('morgan');
-const winston = require('winston');
 
 const app = express();
 
@@ -29,67 +28,6 @@ app.set('trust proxy', 1);
 
 // Serve static files from the public folder
 app.use(express.static('public'));
-
-const logger = winston.createLogger({
-    level: 'info',
-    transports: [
-        new winston.transports.Console({ format: winston.format.combine(winston.format.colorize(), winston.format.simple()) }),
-        new winston.transports.File({ filename: 'logs/server.log', level: 'info' })
-    ]
-});
-
-
-
-// Auth middleware
-app.use(async (req, res, next) => {
-    const token = req.cookies.sso_token;
-    if (!token) {
-        let next = "https://"+req.headers.host+req.originalUrl;
-        next = encodeURIComponent(next);
-        return res.redirect(`https://sso.verto-it.com/login?next=${next}`);
-    }
-
-    try {
-        const response = await axios.get('https://sso.verto-it.com/validate', {
-            headers: {
-                Cookie: req.headers.cookie
-            }
-        });
-        if (response.data.authenticated) {
-            req.user = response.data.user;
-
-            const newTokenResponse = await axios.get('https://sso.verto-it.com/extend', {
-                headers: {
-                    Cookie: req.headers.cookie
-                }
-            })
-            
-            if (newTokenResponse.data.token) {
-                res.cookie('sso_token', newTokenResponse.data.token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: 'None',
-                    domain: '.verto-it.com'
-                });
-            }else {
-                logger.error('No token received from auth server');
-            }
-
-            next();
-        } else {
-            return res.redirect('https://sso.verto-it.com/login');
-        }
-    } catch (err) {
-        if (err.response.status === 401) {
-            res.clearCookie('sso_token', { domain: '.verto-it.com' });
-            return res.redirect('https://sso.verto-it.com/login');
-        }
-
-        logger.error(err);
-        return res.status(401).send('Authentication failed');
-    }
-});
-
 
 app.post('/localize', async (req, res) => {
     const cssUrl = req.body.cssUrl;
@@ -154,10 +92,6 @@ app.post('/localize', async (req, res) => {
         console.error('Error processing /localize:', error);
         res.status(500).send('Error processing request.');
     }
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
 });
 
 const PORT = process.env.PORT || 3000;
