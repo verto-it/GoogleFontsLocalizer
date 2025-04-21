@@ -16,7 +16,6 @@ app.use(compression());
 
 // HTTP request logging
 app.use(morgan(':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"', {
-    skip: (req, res) => req.ip === '127.0.0.1' || req.ip === '::1',
     stream: process.stdout
 }));
 
